@@ -1,25 +1,128 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "RepData"
+author: "Ben Meddeb"
+date: "April 15, 2015"
+output: html_document
+keep_md: true
 ---
 
 
 ## Loading and preprocessing the data
 
+Manually download and unzip [the Activity dataset](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) 
+
+```{r  echo = TRUE}
+library (plyr)
+library(data.table)
+library (xtable)
+library(lattice)
+Activity <- read.csv("activity.csv")
+Activity <- data.table(Activity, keep.rownames=FALSE) 
+
+```
+
 
 
 ## What is mean total number of steps taken per day?
 
+We are going to use the 'plyr package to summarize the data ommiting the NAs
+
+```{r  echo = TRUE}
+nsd <- ddply (Activity, .(date), summarize, steps=sum(steps, na.rm=TRUE))
+```
+Draw a quick Histogram to summrize the data : 
+```{r}
+hist(nsd$steps, col='red', main ='Total number of steps taken per day', xlab = 'Mean Number of Steps', breaks = 10) 
+rug(nsd$steps, col=2, lwd=2)
+```
+
+
+Display the number of steps summary per day : 
+```{r}
+xtable(summary(nsd), type="html")
+```
+
+Calculate the mean and median of the total number of recorded steps : 
+```{r}
+steps_mean <- mean(nsd$steps)
+steps_median <- median(nsd$steps)
+```
+
+**The data indicates that the mean of the total number of steps per day is ** *`r steps_mean`* **with a median of** *`r steps_median`.*
 
 
 ## What is the average daily activity pattern?
 
+To average the daily pattern we will use the plyr package again to summarize by the intervals recorded ommiting NAs: 
+
+```{r}
+adp <- ddply (Activity, .(interval), summarize, steps = mean(steps, na.rm=TRUE))
+```
+
+Display the summary : 
+
+```{r}
+xtable(summary(adp))
+```
+
+Quick plot
+
+```{r}
+plot(adp, type = "l", col = "red")
+```
 
 
 ## Imputing missing values
 
+Calculating the number of missing values : 
+
+```{r}
+missingValue <- sum(is.na(Activity))
+```
+
+The number of missing values is **`r missingValue`**
+
+We have already calculated the average number of steps recorded per day and we stored the result in `adp` , So I am going to replace the NAs with the corresponding average and store the new data in `newActivity` 
+
+```{r}
+newActivity <- Activity
+newActivity$steps[is.na(Activity$steps)] <- adp$steps[adp$interval == newActivity$interval[is.na(Activity$steps)]]
+newActivity$steps[is.na(Activity$steps)] <- mean (Activity$steps, na.rm=TRUE)
+```
+
+Summary of the newly compiled data `newActivity` to compare it to the original data `Activity`, Just like before we will use the plyr package : 
+
+``` {r}
+newNsd  <- ddply(newActivity, .(date), summarize, steps=sum(steps))
+xtable(summary(newNsd), type="html")
+``` 
+
+
+Histogram and summary of the new data 
+
+```{r}
+hist(newNsd$steps, col='red', main ='Total number of steps taken per day', xlab = 'Mean Number of Steps', breaks = 10) 
+rug(nsd$steps, col=2, lwd=2)
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+To answer the question we have to create a new factor weekend or weekday by adding a new column `weekdays` : 
+
+```{r}
+weekdays <- weekdays (as.Date (newActivity$date))
+newActivity$dayType <- factor (weekdays, levels <- c ('weekday', 'weekend'))
+newActivity$dayType[] <- 'weekday'
+newActivity$dayType[weekdays %in% c ('Saturday', 'Sunday')] <- 'weekend'
+```
+
+plot the answer : 
+
+```{r}
+newAdp <- ddply (newActivity, .(interval, dayType), summarize, stepMean = mean(steps, na.rm=TRUE))
+xyplot (stepMean ~ interval | dayType, data=newAdp, type='l', layout=c(1, 2))
+```
+
+
+# End 
