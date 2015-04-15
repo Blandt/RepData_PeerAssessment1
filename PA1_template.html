@@ -80,7 +80,7 @@ rug(nsd$steps, col=2, lwd=2)</code></pre>
 <p>Display the number of steps summary per day :</p>
 <pre class="r"><code>xtable(summary(nsd), type=&quot;html&quot;)</code></pre>
 <pre><code>## % latex table generated in R 3.1.2 by xtable 1.7-4 package
-## % Wed Apr 15 15:04:48 2015
+## % Wed Apr 15 15:19:18 2015
 ## \begin{table}[ht]
 ## \centering
 ## \begin{tabular}{rll}
@@ -109,7 +109,7 @@ steps_median &lt;- median(nsd$steps)</code></pre>
 <p>Display the summary :</p>
 <pre class="r"><code>xtable(summary(adp))</code></pre>
 <pre><code>## % latex table generated in R 3.1.2 by xtable 1.7-4 package
-## % Wed Apr 15 15:04:48 2015
+## % Wed Apr 15 15:19:18 2015
 ## \begin{table}[ht]
 ## \centering
 ## \begin{tabular}{rll}
@@ -142,7 +142,7 @@ newActivity$steps[is.na(Activity$steps)] &lt;- mean (Activity$steps, na.rm=TRUE)
 <pre class="r"><code>newNsd  &lt;- ddply(newActivity, .(date), summarize, steps=sum(steps))
 xtable(summary(newNsd), type=&quot;html&quot;)</code></pre>
 <pre><code>## % latex table generated in R 3.1.2 by xtable 1.7-4 package
-## % Wed Apr 15 15:04:48 2015
+## % Wed Apr 15 15:19:18 2015
 ## \begin{table}[ht]
 ## \centering
 ## \begin{tabular}{rll}
